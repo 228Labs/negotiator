@@ -67,7 +67,19 @@ class NegotiationService:
 
     def find_all_negotiations_with_outcome(self) -> List[NegotiationOutcome]:
         # TODO: Implement method to retrieve page data
-        return []
+        with self.__db.transaction() as connection:
+            all_negotiations = self.__negotiation_gateway.find_all(connection)
+            negotation_outcomes = []
+            for negotiation in all_negotiations:
+                messages = self.__message_gateway.list_for_negotiation(negotiation.id, connection)
+                negotation_outcomes.append(
+                    NegotiationOutcome(
+                        negotiation.id,
+                        message_count=len(messages),
+                        final_message=messages[-1].content
+                    )
+                )
+            return negotation_outcomes
 
     def add_messages(self, negotiation_id: UUID, messages: List[Message]) -> None:
         with self.__db.transaction() as connection:

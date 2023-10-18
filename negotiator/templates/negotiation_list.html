@@ -4,5 +4,13 @@
 
 {% block body %}
     {#  TODO: Render something more interesting.  #}
-    <p>TODO: Placeholder!</p>
+    <ul>
+        {% for negotiation in negotiations %}
+            <li>
+                Id: {{ negotiation.id }}
+                Count: {{ negotiation.message_count }}
+                Final Message: {{ negotiation.final_message }}
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock %}

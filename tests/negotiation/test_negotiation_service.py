@@ -76,3 +76,7 @@ class TestNegotiationService(TestCase):
 
         negotiations_with_message_counts = self.service.find_all_negotiations_with_outcome()
         self.assertEqual(len(negotiations_with_message_counts), 1)
+        self.assertEqual(negotiations_with_message_counts[0].id, negotiation_id)
+        self.assertEqual(negotiations_with_message_counts[0].message_count, 2)
+        self.assertEqual(negotiations_with_message_counts[0].final_message,
+                         "Hi there. I see you're looking at this 2020 Toyota 4Runner. How can I help you?")

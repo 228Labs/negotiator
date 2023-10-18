@@ -3,7 +3,7 @@ from typing import Optional, cast
 from uuid import UUID, uuid4
 
 from negotiator.database_support.database_template import DatabaseTemplate
-from negotiator.database_support.result_mapping import map_one_result
+from negotiator.database_support.result_mapping import map_one_result, map_results
 from sqlalchemy import Connection
 
 
@@ -36,3 +36,12 @@ class NegotiationGateway:
             id=id)
 
         return map_one_result(result, lambda row: NegotiationRecord(cast(UUID, row['id'])))
+
+    def find_all(self, connection: Optional[Connection] = None) -> list[NegotiationRecord]:
+        result = self.__db.query(
+            statement="""
+                         select id from negotiations
+                         """,
+            connection=connection)
+
+        return map_results(result, lambda row: NegotiationRecord(cast(UUID, row['id'])))
