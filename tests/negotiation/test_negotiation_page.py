@@ -28,7 +28,7 @@ class TestNegotiationPage(TestCase):
         service = NegotiationService(self.db, negotiation_gateway, message_gateway)
         blueprint = negotiation_page(service, Assistant())
 
-        self.test_client = test_client(blueprint, authenticated=True)
+        self.test_client = test_client(blueprint)
         self.negotiation_id = service.create()
         self.first_message_id = cast(Negotiation, service.find(cast(UUID, self.negotiation_id))).messages[1].id
 
