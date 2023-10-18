@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, List, Tuple, Callable
+from typing import Optional, List, Tuple
 from uuid import UUID, uuid4
 
 from sqlalchemy import Connection
@@ -48,27 +48,30 @@ class NegotiationService:
         self.__message_gateway = message_gateway
 
     def create(self) -> Optional[UUID]:
-        return self.__db.transaction(self.__create_negotiation)
+        with self.__db.transaction() as connection:
+            return self.__create_negotiation(connection)
 
     def find(self, negotiation_id: UUID) -> Optional[Negotiation]:
-        negotiation_record, message_records = self.__db.transaction(self.__find_negotiation(negotiation_id))
-        if negotiation_record is None:
-            return None
+        with self.__db.transaction() as connection:
+            negotiation_record, message_records = self.__find_negotiation(connection, negotiation_id)
+            if negotiation_record is None:
+                return None
 
-        return Negotiation(
-            id=negotiation_record.id,
-            messages=[
-                Message(id=record.id, role=record.role, content=record.content)
-                for record in message_records
-            ]
-        )
+            return Negotiation(
+                id=negotiation_record.id,
+                messages=[
+                    Message(id=record.id, role=record.role, content=record.content)
+                    for record in message_records
+                ]
+            )
 
     def find_all_negotiations_with_outcome(self) -> List[NegotiationOutcome]:
         # TODO: Implement method to retrieve page data
         return []
 
-    def add_messages(self, negotiation_id: UUID, messages: List[Message]):
-        self.__db.transaction(self.__create_messages(negotiation_id, messages))
+    def add_messages(self, negotiation_id: UUID, messages: List[Message]) -> None:
+        with self.__db.transaction() as connection:
+            self.__create_messages(connection, negotiation_id, messages)
 
     def truncate(self, negotiation_id: UUID, at_message_id: UUID) -> None:
         self.__message_gateway.truncate_for_negotiation(
@@ -104,28 +107,23 @@ class NegotiationService:
 
     def __find_negotiation(
             self,
+            connection: Connection,
             negotiation_id: UUID,
-    ) -> Callable[[Connection], Tuple[Optional[NegotiationRecord], List[MessageRecord]]]:
-        def find_this_negotiation(connection: Connection) -> Tuple[Optional[NegotiationRecord], List[MessageRecord]]:
-            negotiation = self.__negotiation_gateway.find(negotiation_id, connection)
-            if negotiation is None:
-                return None, []
+    ) -> Tuple[Optional[NegotiationRecord], List[MessageRecord]]:
+        negotiation = self.__negotiation_gateway.find(negotiation_id, connection)
+        if negotiation is None:
+            return None, []
 
-            messages = self.__message_gateway.list_for_negotiation(negotiation.id, connection)
+        messages = self.__message_gateway.list_for_negotiation(negotiation.id, connection)
 
-            return negotiation, messages
+        return negotiation, messages
 
-        return find_this_negotiation
-
-    def __create_messages(self, negotiation_id: UUID, messages: List[Message]) -> Callable[[Connection], None]:
-        def create_these_messages(connection: Connection):
-            for message in messages:
-                self.__message_gateway.create(
-                    negotiation_id=negotiation_id,
-                    id=message.id,
-                    role=message.role,
-                    content=message.content,
-                    connection=connection,
-                )
-
-        return create_these_messages
+    def __create_messages(self, connection: Connection, negotiation_id: UUID, messages: List[Message]) -> None:
+        for message in messages:
+            self.__message_gateway.create(
+                negotiation_id=negotiation_id,
+                id=message.id,
+                role=message.role,
+                content=message.content,
+                connection=connection,
+            )
