@@ -39,7 +39,7 @@ def negotiation_page(negotiation_service: NegotiationService, assistant: Assista
         return render_template(
             'negotiation_list.html',
             # Pass negotiations data to HTML template
-            negotiation=negotiations
+            negotiations=negotiations
         )
 
     @page.get('/negotiation/<negotiation_id>')
