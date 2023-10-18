@@ -49,6 +49,13 @@ class TestNegotiationPage(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertIn('Hi there', response.text)
 
+    def test_show_list(self):
+        response = self.test_client.get(f'/negotiations')
+
+        self.assertEqual(200, response.status_code)
+        self.assertNotIn('Placeholder!', response.text)
+
+
     def test_show__not_found(self):
         response = self.test_client.get(f'/negotiation/decf0189-9220-42ca-b825-9df389baee48')
 

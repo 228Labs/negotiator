@@ -67,3 +67,12 @@ class TestNegotiationService(TestCase):
         self.assertEqual('user content', negotiation.messages[2].content)
         self.assertEqual('assistant', negotiation.messages[3].role)
         self.assertEqual('assistant content', negotiation.messages[3].content)
+
+    def test_find_all_with_message_counts__single_negotiation(self):
+        # TODO: Test fails because find_all_negotiations_with_outcome is not implemented.
+
+        # Creates a negotiation with two initial messages and returns an ID.
+        negotiation_id = self.service.create()
+
+        negotiations_with_message_counts = self.service.find_all_negotiations_with_outcome()
+        self.assertEqual(len(negotiations_with_message_counts), 1)

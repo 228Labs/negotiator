@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from typing import Optional, List, Tuple, Callable
 from uuid import UUID, uuid4
 
+from sqlalchemy import Connection
+
 from negotiator.database_support.database_template import DatabaseTemplate
 from negotiator.negotiation.message_gateway import MessageGateway, MessageRecord
 from negotiator.negotiation.negotiation_gateway import NegotiationGateway, NegotiationRecord
-from sqlalchemy import Connection
 
 
 @dataclass
@@ -27,13 +28,20 @@ class Negotiation:
         )
 
 
+@dataclass
+class NegotiationOutcome:
+    id: UUID
+    message_count: int
+    final_message: str
+
+
 class NegotiationService:
 
     def __init__(
-        self,
-        db: DatabaseTemplate,
-        negotiation_gateway: NegotiationGateway,
-        message_gateway: MessageGateway,
+            self,
+            db: DatabaseTemplate,
+            negotiation_gateway: NegotiationGateway,
+            message_gateway: MessageGateway,
     ) -> None:
         self.__db = db
         self.__negotiation_gateway = negotiation_gateway
@@ -54,6 +62,10 @@ class NegotiationService:
                 for record in message_records
             ]
         )
+
+    def find_all_negotiations_with_outcome(self) -> List[NegotiationOutcome]:
+        # TODO: Implement method to retrieve page data
+        return []
 
     def add_messages(self, negotiation_id: UUID, messages: List[Message]):
         self.__db.transaction(self.__create_messages(negotiation_id, messages))
@@ -91,8 +103,8 @@ class NegotiationService:
         return negotiation_id
 
     def __find_negotiation(
-        self,
-        negotiation_id: UUID,
+            self,
+            negotiation_id: UUID,
     ) -> Callable[[Connection], Tuple[Optional[NegotiationRecord], List[MessageRecord]]]:
         def find_this_negotiation(connection: Connection) -> Tuple[Optional[NegotiationRecord], List[MessageRecord]]:
             negotiation = self.__negotiation_gateway.find(negotiation_id, connection)

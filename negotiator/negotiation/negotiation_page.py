@@ -31,6 +31,17 @@ def negotiation_page(negotiation_service: NegotiationService, assistant: Assista
         negotiation_id = negotiation_service.create()
         return redirect(f'/negotiation/{negotiation_id}')
 
+    @page.get('/negotiations')
+    def show_list() -> ResponseReturnValue:
+        # TODO: Retrieve data and render - currently returns an empty list.
+        negotiations = negotiation_service.find_all_negotiations_with_outcome()
+
+        return render_template(
+            'negotiation_list.html',
+            # Pass negotiations data to HTML template
+            negotiation=negotiations
+        )
+
     @page.get('/negotiation/<negotiation_id>')
     def show(negotiation_id: UUID) -> ResponseReturnValue:
         negotiation = negotiation_service.find(negotiation_id)

@@ -68,7 +68,9 @@ button.large, .button.large {
 
 .centered {
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
     justify-content: center;
     padding-top: 10rem;
 }
