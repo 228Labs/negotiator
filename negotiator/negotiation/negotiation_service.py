@@ -53,12 +53,14 @@ class NegotiationService:
 
     def find(self, negotiation_id: UUID) -> Optional[Negotiation]:
         with self.__db.transaction() as connection:
-            negotiation_record, message_records = self.__find_negotiation(connection, negotiation_id)
-            if negotiation_record is None:
+            negotiation = self.__negotiation_gateway.find(negotiation_id, connection)
+            if negotiation is None:
                 return None
 
+            message_records = self.__message_gateway.list_for_negotiation(negotiation.id, connection)
+
             return Negotiation(
-                id=negotiation_record.id,
+                id=negotiation.id,
                 messages=[
                     Message(id=record.id, role=record.role, content=record.content)
                     for record in message_records
@@ -104,19 +106,6 @@ class NegotiationService:
         self.__message_gateway.create(negotiation_id, uuid4(), 'assistant', assistant_message, connection)
 
         return negotiation_id
-
-    def __find_negotiation(
-            self,
-            connection: Connection,
-            negotiation_id: UUID,
-    ) -> Tuple[Optional[NegotiationRecord], List[MessageRecord]]:
-        negotiation = self.__negotiation_gateway.find(negotiation_id, connection)
-        if negotiation is None:
-            return None, []
-
-        messages = self.__message_gateway.list_for_negotiation(negotiation.id, connection)
-
-        return negotiation, messages
 
     def __create_messages(self, connection: Connection, negotiation_id: UUID, messages: List[Message]) -> None:
         for message in messages:
