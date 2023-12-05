@@ -74,5 +74,7 @@ class TestNegotiationService(TestCase):
         # Creates a negotiation with two initial messages and returns an ID.
         negotiation_id = self.service.create()
 
-        negotiations_with_message_counts = self.service.find_all_negotiations_with_outcome()
+        negotiations_with_message_counts = self.service.find_all_negotiations_with_last_message()
         self.assertEqual(len(negotiations_with_message_counts), 1)
+
+    # Other tests can go here.

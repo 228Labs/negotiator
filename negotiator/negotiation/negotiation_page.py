@@ -34,7 +34,7 @@ def negotiation_page(negotiation_service: NegotiationService, assistant: Assista
     @page.get('/negotiations')
     def show_list() -> ResponseReturnValue:
         # TODO: Retrieve data and render - currently returns an empty list.
-        negotiations = negotiation_service.find_all_negotiations_with_outcome()
+        negotiations = negotiation_service.find_all_negotiations_with_last_message()
 
         return render_template(
             'negotiation_list.html',

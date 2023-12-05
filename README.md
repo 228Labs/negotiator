@@ -2,6 +2,19 @@
 
 An app that helps you to practice negotiations with ChatGPT.
 
+## Challenge
+- We’re building a simple app to help our users practice negotiating to buy a used car.
+- Stack: Python Flask application, integrates with OpenAI’s LLM, and talks to a Postgres database.
+- We would like to extend the application to support:
+    - A way for users to see the negotiations they have created including:
+        - The negotiation ID
+        - A count of the messages included in the negotiation
+        - The final message sent in the negotiation - representing a rough “outcome” of the negotiation
+        - A link to resume the negotiation.
+    - Start with the simplest working solution you can, we can refactor at the end.
+    - Write tests to help you work through the implementation.
+    - Ask questions now and as you go.
+
 ## Architecture
 
 Negotiator is a server side rendered app using [Flask](https://flask.palletsprojects.com/).

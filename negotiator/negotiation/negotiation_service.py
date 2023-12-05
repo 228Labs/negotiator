@@ -29,7 +29,7 @@ class Negotiation:
 
 
 @dataclass
-class NegotiationOutcome:
+class NegotiationWithMessage:
     id: UUID
     message_count: int
     final_message: str
@@ -67,7 +67,7 @@ class NegotiationService:
                 ]
             )
 
-    def find_all_negotiations_with_outcome(self) -> List[NegotiationOutcome]:
+    def find_all_negotiations_with_last_message(self) -> List[NegotiationWithMessage]:
         # TODO: Implement method to retrieve page data
         return []
 
