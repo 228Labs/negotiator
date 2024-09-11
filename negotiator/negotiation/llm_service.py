@@ -2,7 +2,7 @@ import time
 from uuid import uuid4
 
 import openai
-from freeplay import Freeplay, RecordPayload, CallInfo
+from freeplay import Freeplay, RecordPayload, CallInfo, ResponseInfo
 
 from negotiator.negotiation.negotiation_service import NegotiationService, Negotiation, Message
 
