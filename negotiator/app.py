@@ -9,8 +9,8 @@ from negotiator.database_support.database_template import DatabaseTemplate
 from negotiator.environment import Environment
 from negotiator.health_api import health_api
 from negotiator.index_page import index_page
-from negotiator.negotiation.message_gateway import MessageGateway
-from negotiator.negotiation.negotiation_gateway import NegotiationGateway
+from negotiator.negotiation.message_repository import MessageRepository
+from negotiator.negotiation.negotiation_repository import NegotiationRepository
 from negotiator.negotiation.negotiation_page import negotiation_page, LLMService
 from negotiator.negotiation.negotiation_service import NegotiationService
 
@@ -28,9 +28,9 @@ def create_app(env: Environment = Environment.from_env()) -> Flask:
 
     freeplay_client = Freeplay(env.freeplay_api_key, 'https://app.freeplay.ai/api')
 
-    negotiation_gateway = NegotiationGateway(db_template)
-    message_gateway = MessageGateway(db_template)
-    negotiation_service = NegotiationService(db_template, negotiation_gateway, message_gateway)
+    negotiation_repository = NegotiationRepository(db_template)
+    message_repository = MessageRepository(db_template)
+    negotiation_service = NegotiationService(db_template, negotiation_repository, message_repository)
     llm_service = LLMService(negotiation_service, freeplay_client, env.freeplay_project_id)
     app.register_blueprint(index_page())
     app.register_blueprint(negotiation_page(negotiation_service, llm_service))

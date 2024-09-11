@@ -7,8 +7,8 @@ from uuid import UUID
 
 import responses
 
-from negotiator.negotiation.message_gateway import MessageGateway
-from negotiator.negotiation.negotiation_gateway import NegotiationGateway
+from negotiator.negotiation.message_repository import MessageRepository
+from negotiator.negotiation.negotiation_repository import NegotiationRepository
 from negotiator.negotiation.negotiation_page import negotiation_page
 from negotiator.negotiation.negotiation_service import NegotiationService, Negotiation
 from tests.blueprint_test_support import test_client
@@ -22,10 +22,10 @@ class TestNegotiationPage(TestCase):
         self.db = test_db_template()
         self.db.clear()
 
-        negotiation_gateway = NegotiationGateway(self.db)
-        message_gateway = MessageGateway(self.db)
+        negotiation_repository = NegotiationRepository(self.db)
+        message_repository = MessageRepository(self.db)
 
-        service = NegotiationService(self.db, negotiation_gateway, message_gateway)
+        service = NegotiationService(self.db, negotiation_repository, message_repository)
         self.project_id = str(uuid.uuid4())
         llm_service = mock.Mock()
 

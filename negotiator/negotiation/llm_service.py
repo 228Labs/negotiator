@@ -1,8 +1,10 @@
+import json
 import time
 from uuid import uuid4
 
 import openai
 from freeplay import Freeplay, RecordPayload, CallInfo, ResponseInfo
+from freeplay.model import OpenAIFunctionCall
 
 from negotiator.negotiation.negotiation_service import NegotiationService, Negotiation, Message
 
@@ -57,6 +59,7 @@ class LLMService:
                 trace_info=trace
             )
         )
-        trace.record_output(self.freeplay_project_id, reply)
+        if reply:
+            trace.record_output(self.freeplay_project_id, reply)
 
         return reply

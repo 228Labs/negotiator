@@ -2,8 +2,8 @@ from typing import cast
 from unittest import TestCase
 from uuid import UUID
 
-from negotiator.negotiation.message_gateway import MessageGateway
-from negotiator.negotiation.negotiation_gateway import NegotiationGateway
+from negotiator.negotiation.message_repository import MessageRepository
+from negotiator.negotiation.negotiation_repository import NegotiationRepository
 from negotiator.negotiation.negotiation_service import NegotiationService, Negotiation, Message
 from tests.db_test_support import test_db_template
 
@@ -14,10 +14,10 @@ class TestNegotiationService(TestCase):
         self.db = test_db_template()
         self.db.clear()
 
-        negotiation_gateway = NegotiationGateway(self.db)
-        message_gateway = MessageGateway(self.db)
+        negotiation_repository = NegotiationRepository(self.db)
+        message_repository = MessageRepository(self.db)
 
-        self.service = NegotiationService(self.db, negotiation_gateway, message_gateway)
+        self.service = NegotiationService(self.db, negotiation_repository, message_repository)
 
     def test_create(self):
         negotiation_id = self.service.create()
