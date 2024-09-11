@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from typing import Optional, List, Tuple
+from typing import Optional, List
 from uuid import UUID, uuid4
 
 from sqlalchemy import Connection
 
 from negotiator.database_support.database_template import DatabaseTemplate
-from negotiator.negotiation.message_gateway import MessageGateway, MessageRecord
-from negotiator.negotiation.negotiation_gateway import NegotiationGateway, NegotiationRecord
+from negotiator.negotiation.message_gateway import MessageGateway
+from negotiator.negotiation.negotiation_gateway import NegotiationGateway
 
 
 @dataclass
@@ -26,6 +26,13 @@ class Negotiation:
             id=self.id,
             messages=[*self.messages, message]
         )
+
+    def messages_dict(self) -> list[dict[str, str]]:
+        return [
+            {'role': m.role, 'content': m.content}
+            for m in self.messages
+            if m.role in ['user', 'assistant', 'system']
+        ]
 
 
 @dataclass
@@ -67,10 +74,6 @@ class NegotiationService:
                 ]
             )
 
-    def find_all_negotiations_with_last_message(self) -> List[NegotiationWithMessage]:
-        # TODO: Implement method to retrieve page data
-        return []
-
     def add_messages(self, negotiation_id: UUID, messages: List[Message]) -> None:
         with self.__db.transaction() as connection:
             self.__create_messages(connection, negotiation_id, messages)
@@ -82,19 +85,6 @@ class NegotiationService:
         )
 
     def __create_negotiation(self, connection: Connection) -> Optional[UUID]:
-        system_message = """
-            You are a used car salesman talking to someone who is hoping to buy one of the cars that you have in
-            stock, a 2020 Toyota 4Runner. You paid $20,000 for the truck, and would like to get at least $22,000 for
-            it. The list price is $30,000. Negotiate with the potential buyer to get the best price.
-        
-            Don't tell the buyer what you purchased the truck for, or your minimum selling price. Your financial
-            bonus is based on getting the highest possible price for the truck.
-        
-            Don't talk to the buyer about any other vehicles you have available, try to make a deal on this one.
-        
-            You'd like to make the deal today, so if the buyer says that they need time to think try to pressure
-            or incentivize them into making the deal now.
-        """
         assistant_message = 'Hi there. I see you\'re looking at this 2020 Toyota 4Runner. How can I help you?'
 
         negotiation_id = self.__negotiation_gateway.create(connection)
@@ -102,7 +92,6 @@ class NegotiationService:
             connection.rollback()
             return None
 
-        self.__message_gateway.create(negotiation_id, uuid4(), 'system', system_message, connection)
         self.__message_gateway.create(negotiation_id, uuid4(), 'assistant', assistant_message, connection)
 
         return negotiation_id

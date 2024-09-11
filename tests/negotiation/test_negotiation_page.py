@@ -1,12 +1,12 @@
 import json
 import re
+import uuid
 from typing import cast
-from unittest import TestCase
+from unittest import TestCase, mock
 from uuid import UUID
 
 import responses
 
-from negotiator.negotiation.assistant import Assistant
 from negotiator.negotiation.message_gateway import MessageGateway
 from negotiator.negotiation.negotiation_gateway import NegotiationGateway
 from negotiator.negotiation.negotiation_page import negotiation_page
@@ -26,11 +26,15 @@ class TestNegotiationPage(TestCase):
         message_gateway = MessageGateway(self.db)
 
         service = NegotiationService(self.db, negotiation_gateway, message_gateway)
-        blueprint = negotiation_page(service, Assistant())
+        self.project_id = str(uuid.uuid4())
+        llm_service = mock.Mock()
+
+        llm_service.call_and_record_negotiator_chat_turn.return_value = "I sure will"
+        blueprint = negotiation_page(service, llm_service)
 
         self.test_client = test_client(blueprint)
         self.negotiation_id = service.create()
-        self.first_message_id = cast(Negotiation, service.find(cast(UUID, self.negotiation_id))).messages[1].id
+        self.first_message_id = cast(Negotiation, service.find(cast(UUID, self.negotiation_id))).messages[0].id
 
     def test_create(self):
         response = self.test_client.post('/negotiation')
@@ -49,13 +53,6 @@ class TestNegotiationPage(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertIn('Hi there', response.text)
 
-    def test_show_list(self):
-        response = self.test_client.get(f'/negotiations')
-
-        self.assertEqual(200, response.status_code)
-        self.assertNotIn('Placeholder!', response.text)
-
-
     def test_show__not_found(self):
         response = self.test_client.get(f'/negotiation/decf0189-9220-42ca-b825-9df389baee48')
 
@@ -64,11 +61,6 @@ class TestNegotiationPage(TestCase):
 
     @responses.activate
     def test_new_message(self):
-        responses.post(
-            'https://openai.example.com/chat/completions',
-            json={'choices': [{'message': {'content': 'I sure will'}}]}
-        )
-
         response = self.test_client.post(
             f'/negotiation/{self.negotiation_id}/messages',
             headers={'Content-Type': 'application/json'},
