@@ -31,7 +31,7 @@ def create_app(env: Environment = Environment.from_env()) -> Flask:
     negotiation_repository = NegotiationRepository(db_template)
     message_repository = MessageRepository(db_template)
     negotiation_service = NegotiationService(db_template, negotiation_repository, message_repository)
-    llm_service = LLMService(negotiation_service, freeplay_client, env.freeplay_project_id)
+    llm_service = LLMService(negotiation_service, freeplay_client, openai.chat.completions.create, env.freeplay_project_id)
     app.register_blueprint(index_page())
     app.register_blueprint(negotiation_page(negotiation_service, llm_service))
     app.register_blueprint(health_api())
