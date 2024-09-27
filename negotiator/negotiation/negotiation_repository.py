@@ -12,7 +12,7 @@ class NegotiationRecord:
     id: UUID
 
 
-class NegotiationGateway:
+class NegotiationRepository:
     def __init__(self, db: DatabaseTemplate) -> None:
         self.__db = db
 

@@ -13,12 +13,6 @@
 <body>
 <header>
     <a href="/"><h1>Negotiator</h1></a>
-    {% if g.username %}
-    <nav>
-        <div>{{ g.username }}</div>
-        <a href="/logout" class="button">sign out</a>
-    </nav>
-    {% endif %}
 </header>
 <main>
     {% block body %}{% endblock %}

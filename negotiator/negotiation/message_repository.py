@@ -15,7 +15,7 @@ class MessageRecord:
     content: str
 
 
-class MessageGateway:
+class MessageRepository:
     def __init__(self, db: DatabaseTemplate) -> None:
         self.__db = db
 

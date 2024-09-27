@@ -9,13 +9,14 @@ readme = "README.md"
 python = "^3.11"
 flask = "^2.3.3"
 mypy = "^1.5.1"
-openai = "^0.28.0"
+openai = "^1.45"
 alembic = "^1.12.0"
 responses = "^0.23.3"
 gunicorn = "^21.2.0"
 psycopg2-binary = "^2.9.7"
 requests = "^2.31.0"
 types-requests = "^2.31.0.2"
+freeplay = "^0.3.7"
 
 [build-system]
 requires = ["poetry-core"]

@@ -2,8 +2,8 @@ from typing import cast
 from unittest import TestCase
 from uuid import UUID
 
-from negotiator.negotiation.message_gateway import MessageGateway
-from negotiator.negotiation.negotiation_gateway import NegotiationGateway
+from negotiator.negotiation.message_repository import MessageRepository
+from negotiator.negotiation.negotiation_repository import NegotiationRepository
 from negotiator.negotiation.negotiation_service import NegotiationService, Negotiation, Message
 from tests.db_test_support import test_db_template
 
@@ -14,10 +14,10 @@ class TestNegotiationService(TestCase):
         self.db = test_db_template()
         self.db.clear()
 
-        negotiation_gateway = NegotiationGateway(self.db)
-        message_gateway = MessageGateway(self.db)
+        negotiation_repository = NegotiationRepository(self.db)
+        message_repository = MessageRepository(self.db)
 
-        self.service = NegotiationService(self.db, negotiation_gateway, message_gateway)
+        self.service = NegotiationService(self.db, negotiation_repository, message_repository)
 
     def test_create(self):
         negotiation_id = self.service.create()
@@ -28,7 +28,6 @@ class TestNegotiationService(TestCase):
         self.assertIsNotNone(negotiation_id)
         self.assertEqual([{'id': negotiation_id}], negotiations)
         self.assertEqual([
-            {'negotiation_id': negotiation_id, 'role': 'system'},
             {'negotiation_id': negotiation_id, 'role': 'assistant'},
         ], messages)
 
@@ -41,9 +40,8 @@ class TestNegotiationService(TestCase):
         negotiation = cast(Negotiation, result)
 
         self.assertEqual(negotiation_id, negotiation.id)
-        self.assertEqual(2, len(negotiation.messages))
-        self.assertEqual('system', negotiation.messages[0].role)
-        self.assertEqual('assistant', negotiation.messages[1].role)
+        self.assertEqual(1, len(negotiation.messages))
+        self.assertEqual('assistant', negotiation.messages[0].role)
 
     def test_find__not_found(self):
         result = self.service.find(UUID('9ed47ce6-6410-40ce-875a-aaad977259c2'))
@@ -62,8 +60,8 @@ class TestNegotiationService(TestCase):
         negotiation = cast(Negotiation, result)
 
         self.assertEqual(negotiation_id, negotiation.id)
-        self.assertEqual(4, len(negotiation.messages))
-        self.assertEqual('user', negotiation.messages[2].role)
-        self.assertEqual('user content', negotiation.messages[2].content)
-        self.assertEqual('assistant', negotiation.messages[3].role)
-        self.assertEqual('assistant content', negotiation.messages[3].content)
+        self.assertEqual(3, len(negotiation.messages))
+        self.assertEqual('user', negotiation.messages[1].role)
+        self.assertEqual('user content', negotiation.messages[1].content)
+        self.assertEqual('assistant', negotiation.messages[2].role)
+        self.assertEqual('assistant content', negotiation.messages[2].content)

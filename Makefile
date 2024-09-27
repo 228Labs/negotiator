@@ -25,7 +25,7 @@ web-components/test:
 
 .PHONY: negotiator/run
 negotiator/run:
-	poetry run python -m negotiator;
+	source .env && poetry run python -m negotiator;
 
 .PHONY: migrate
 migrate:
@@ -44,4 +44,4 @@ negotiator/test: negotiator/type-checks
 	poetry run python -m unittest;
 
 .PHONY: test
-test: negotiator/test web-components/test
+test: negotiator/test

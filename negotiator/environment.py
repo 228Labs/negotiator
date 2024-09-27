@@ -14,6 +14,8 @@ class Environment:
     allowed_domains: str
     allowed_addresses: str
     use_flask_debug_mode: bool
+    freeplay_api_key: str
+    freeplay_project_id: str
 
     @classmethod
     def from_env(cls) -> 'Environment':
@@ -28,6 +30,8 @@ class Environment:
             allowed_domains=os.environ.get('ALLOWED_DOMAINS', ""),
             allowed_addresses=os.environ.get('ALLOWED_ADDRESSES', ""),
             use_flask_debug_mode=os.environ.get('USE_FLASK_DEBUG_MODE', 'false') == 'true',
+            freeplay_api_key=os.environ.get('FREEPLAY_API_KEY', ''),
+            freeplay_project_id=os.environ.get('FREEPLAY_PROJECT_ID', ''),
         )
 
     @classmethod

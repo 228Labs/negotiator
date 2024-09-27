@@ -1,12 +1,11 @@
 from dataclasses import dataclass
-from typing import cast, Optional
-from uuid import UUID, uuid4
+from typing import cast
+from uuid import UUID
 
 from flask import Blueprint, render_template, redirect, request, jsonify
 from flask.typing import ResponseReturnValue
 
-from negotiator.authentication.authenticate_user import authenticate_user
-from negotiator.negotiation.assistant import Assistant
+from negotiator.negotiation.llm_service import LLMService
 from negotiator.negotiation.negotiation_service import NegotiationService, Negotiation, Message
 from negotiator.web_support import json_support
 
@@ -24,12 +23,14 @@ class NegotiationInfo:
     messages: list[MessageInfo]
 
 
-def negotiation_page(negotiation_service: NegotiationService, assistant: Assistant) -> Blueprint:
-    page = Blueprint('negotiation_page', __name__)
 
-    @page.before_request
-    def authenticate_user_filter() -> Optional[ResponseReturnValue]:
-        return authenticate_user()
+
+
+def negotiation_page(
+        negotiation_service: NegotiationService,
+        llm_service: LLMService,
+) -> Blueprint:
+    page = Blueprint('negotiation_page', __name__)
 
     @page.post('/negotiation')
     def create() -> ResponseReturnValue:
@@ -62,16 +63,10 @@ def negotiation_page(negotiation_service: NegotiationService, assistant: Assista
             role='user',
         )
 
-        reply = assistant.reply(negotiation.with_message(user_message))
-
-        reply_id = uuid4()
-        negotiation_service.add_messages(negotiation_id, [
-            user_message,
-            Message(id=reply_id, role='assistant', content=reply),
-        ])
+        reply = llm_service.call_and_record_negotiator_chat_turn(negotiation, user_message)
 
         return jsonify({
-            'id': reply_id,
+            'id': reply,
             'role': 'assistant',
             'content': reply,
         }), 201

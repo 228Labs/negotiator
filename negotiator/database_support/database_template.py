@@ -1,4 +1,5 @@
-from typing import Optional, Any, Callable, TypeVar, Generic
+from contextlib import contextmanager
+from typing import Optional, Any, TypeVar
 
 import sqlalchemy
 from sqlalchemy import Engine, Connection, CursorResult
@@ -10,12 +11,14 @@ class DatabaseTemplate:
     def __init__(self, engine: Engine) -> None:
         self.__engine = engine
 
-    def transaction(self, action: Callable[[Connection], T]) -> T:
+    @contextmanager
+    def transaction(self):
         with self.__engine.begin() as connection:
-            return action(connection)
+            yield connection
 
     def query(self, statement: str, connection: Optional[Connection] = None, **kwargs: Any) -> CursorResult:
         if connection is None:
-            return self.transaction(lambda c: c.execute(sqlalchemy.text(statement), kwargs))
+            with self.transaction() as connection:
+                return connection.execute(sqlalchemy.text(statement), kwargs)
         else:
             return connection.execute(sqlalchemy.text(statement), kwargs)
